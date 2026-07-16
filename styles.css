@@ -19,6 +19,7 @@
   --color-amber-border: #d4b896;
   --color-amber-text: #6b4f2e;
   --font-serif: "Merriweather", Georgia, "Times New Roman", serif;
+  --font-display: "Cinzel", "Merriweather", Georgia, serif;
   --font-sans: "Source Sans 3", "Segoe UI", Tahoma, sans-serif;
   --radius: 4px;
   --radius-lg: 10px;
@@ -26,7 +27,7 @@
   --shadow-lift: 0 12px 40px rgba(15, 23, 42, 0.1);
   --max-width: 1120px;
   --max-narrow: 720px;
-  --section-space: clamp(4rem, 7vw, 6.5rem);
+  --section-space: clamp(1.6rem, 3.5vw, 2.8rem);
 
   box-sizing: border-box;
   color: var(--color-ink);
@@ -111,7 +112,24 @@
 
 .ayuno-landing .section__title-center {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.ayuno-landing .section h2 {
+  text-align: center;
+}
+
+.ayuno-landing .guide-header,
+.ayuno-landing .journey__header {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ayuno-landing .guide-header .section__subtitle,
+.ayuno-landing .journey__header p {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .ayuno-landing .section__subtitle {
@@ -150,7 +168,7 @@
    Narrativa = sticky. Interactivo (guía/forms) = story-layer (cubre sin sticky)
    Sin transform:scale → no rompe botones táctiles ni overflow
    -------------------------------------------------------------------------- */
-html {
+html.is-smooth-scroll {
   scroll-behavior: smooth;
 }
 
@@ -158,68 +176,29 @@ html {
   position: relative;
 }
 
-.ayuno-landing .story-progress {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .ayuno-landing .story-progress {
-    display: flex;
-    position: fixed;
-    right: clamp(0.65rem, 2vw, 1.35rem);
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 200;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.45rem;
-  }
-
-  .ayuno-landing .story-progress__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: rgba(148, 163, 184, 0.55);
-    cursor: pointer;
-    transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .ayuno-landing .story-progress__dot:hover {
-    background: var(--color-gold);
-  }
-
-  .ayuno-landing .story-progress__dot.is-active {
-    background: var(--color-gold);
-    transform: scale(1.35);
-    box-shadow: 0 0 0 3px var(--color-gold-subtle);
-  }
-}
-
 /* Paneles narrativos apilados */
 .ayuno-landing .story-panel {
   position: sticky;
   top: 0;
   z-index: 1;
-  min-height: 100vh;
-  min-height: 100svh;
+  min-height: auto;
   height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   box-sizing: border-box;
   background: var(--color-bg);
-  box-shadow: 0 -20px 40px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 -12px 28px rgba(15, 23, 42, 0.08);
   overflow: hidden;
-  /* necesario para el overlay ::after */
   isolation: auto;
 }
 
 .ayuno-landing .hero.story-panel {
   background: #0f172a;
   z-index: 1;
-  justify-content: flex-end;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
 }
 
 .ayuno-landing .section--definition.story-panel {
@@ -232,11 +211,6 @@ html {
   z-index: 3;
   padding: 0;
   justify-content: stretch;
-}
-
-.ayuno-landing .section--benefits.story-panel {
-  background: var(--color-bg);
-  z-index: 4;
 }
 
 .ayuno-landing .section--testimonials.story-panel {
@@ -270,16 +244,17 @@ html {
   background: var(--color-surface);
 }
 
+.ayuno-landing .section--benefits.story-layer {
+  background: var(--color-bg);
+  z-index: 4;
+}
+
 .ayuno-landing .section--journey.story-layer {
   background: linear-gradient(180deg, #f1f0ec 0%, #e8e4db 100%);
 }
 
 .ayuno-landing .section--faq.story-layer {
   background: var(--color-bg-soft);
-}
-
-.ayuno-landing .section--closing.story-layer {
-  background: #0f172a;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -293,14 +268,10 @@ html {
   .ayuno-landing .story-panel.is-recessed::after {
     display: none;
   }
-
-  .ayuno-landing .story-progress {
-    display: none !important;
-  }
 }
 
 /* --------------------------------------------------------------------------
-   HERO — full-bleed image
+   HERO — full-bleed image (zona de texto segura)
    -------------------------------------------------------------------------- */
 .ayuno-landing .hero {
   position: relative;
@@ -308,7 +279,7 @@ html {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   color: #fff;
 }
 
@@ -322,100 +293,97 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 35%;
+  object-position: center center;
 }
 
 .ayuno-landing .hero__overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.55) 45%, rgba(15, 23, 42, 0.88) 100%);
+    radial-gradient(ellipse 70% 55% at 50% 42%, rgba(10, 18, 32, 0.15) 0%, rgba(10, 18, 32, 0.55) 58%, rgba(10, 18, 32, 0.82) 100%),
+    linear-gradient(180deg, rgba(10, 18, 32, 0.55) 0%, rgba(10, 18, 32, 0.35) 38%, rgba(10, 18, 32, 0.78) 100%);
 }
 
 .ayuno-landing .hero__content {
   position: relative;
   z-index: 1;
-  padding-top: clamp(5rem, 12vw, 8rem);
-  padding-bottom: 2rem;
+  width: 100%;
+  padding-top: clamp(4rem, 10vw, 7rem);
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.ayuno-landing .hero__copy {
+  max-width: 54rem;
+  margin: 0 auto;
 }
 
 .ayuno-landing .hero__brand {
-  font-family: var(--font-serif);
-  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  margin: 0 0 1rem;
+}
+
+.ayuno-landing .hero__brand-mark {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: clamp(2.85rem, 9.5vw, 6rem);
   font-weight: 700;
-  color: var(--color-gold-light);
-  margin: 0 0 0.6rem;
+  line-height: 0.98;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff7ea;
+  text-shadow:
+    0 1px 0 rgba(255, 220, 170, 0.35),
+    0 8px 36px rgba(0, 0, 0, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.45);
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(212, 175, 120, 0.55);
 }
 
 .ayuno-landing .hero__title {
-  color: #fff;
-  max-width: 16ch;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-display);
+  color: var(--color-gold-light);
+  max-width: none;
+  font-size: clamp(1.15rem, 2.8vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 auto 1.35rem;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
 }
 
 .ayuno-landing .hero__lead {
   font-family: var(--font-serif);
-  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  font-size: clamp(1.15rem, 2.6vw, 1.45rem);
   font-style: italic;
-  color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 1.75rem;
-  max-width: 28rem;
+  max-width: 30rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
 }
 
-.ayuno-landing .hero__cta {
-  max-width: 32rem;
-  margin-bottom: 1.5rem;
-}
-
-.ayuno-landing .hero__story {
-  position: relative;
-  z-index: 1;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 0 1.5rem;
-}
-
-.ayuno-landing .hero__toggle {
-  display: inline-flex;
+.ayuno-landing .hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   align-items: center;
-  gap: 0.6rem;
-  background: transparent;
-  border: none;
-  color: var(--color-gold-light);
-  font-family: var(--font-sans);
-  font-size: 0.98rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.5rem 0;
+  justify-content: center;
+  margin-bottom: 1.25rem;
 }
 
-.ayuno-landing .hero__toggle:hover {
-  color: #fff;
-}
-
-.ayuno-landing .hero__toggle-icon {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  transition: transform 0.25s ease;
-}
-
-.ayuno-landing .hero__toggle[aria-expanded="true"] .hero__toggle-icon {
-  transform: rotate(225deg);
-  margin-top: 4px;
-}
-
-.ayuno-landing .hero__intro {
-  padding-top: 0.75rem;
-  max-width: 40rem;
-}
-
-.ayuno-landing .hero__intro p {
-  color: rgba(255, 255, 255, 0.88);
+.ayuno-landing .btn-cta--link {
+  display: inline-flex;
+  width: auto;
+  min-width: 16rem;
+  padding: 1.05rem 1.75rem;
+  font-size: 1.08rem;
+  text-decoration: none;
+  text-align: center;
 }
 
 .ayuno-landing .hero__emphasis {
@@ -423,11 +391,130 @@ html {
   color: #fff !important;
   border-left: 3px solid var(--color-gold);
   padding-left: 1rem;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
+  text-align: left;
 }
 
-.ayuno-landing .hero__intro[hidden] {
+/* --------------------------------------------------------------------------
+   ALERTAS sutiles (texto + chevron, sin competir con CTAs)
+   -------------------------------------------------------------------------- */
+.ayuno-landing .alert-disclosure {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.ayuno-landing .alert-disclosure--hero {
+  max-width: 28rem;
+}
+
+.ayuno-landing .alert-disclosure--warn {
+  max-width: 720px;
+  margin-top: 0.25rem;
+}
+
+.ayuno-landing .alert-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.35rem 0.15rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.ayuno-landing .alert-trigger--intro {
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 165, 123, 0.55);
+  text-underline-offset: 0.28em;
+}
+
+.ayuno-landing .alert-trigger--intro:hover {
+  color: #fff;
+  text-decoration-color: var(--color-gold-light);
+}
+
+.ayuno-landing .alert-trigger--warn {
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(166, 124, 82, 0.4);
+  text-underline-offset: 0.28em;
+  display: flex;
+}
+
+.ayuno-landing .alert-trigger--warn:hover {
+  color: var(--color-amber-text);
+  text-decoration-color: var(--color-gold);
+}
+
+.ayuno-landing .alert-trigger__chevron {
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+  margin-top: -0.15rem;
+}
+
+.ayuno-landing .alert-trigger[aria-expanded="true"] .alert-trigger__chevron {
+  transform: rotate(225deg);
+  margin-top: 0.1rem;
+}
+
+.ayuno-landing .alert-panel {
+  margin-top: 0.75rem;
+  padding: 1rem 0 0;
+  border-radius: 0;
+  text-align: left;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.ayuno-landing .alert-panel[hidden] {
   display: none;
+}
+
+.ayuno-landing .alert-panel--hero {
+  background: transparent;
+  border-top-color: rgba(255, 255, 255, 0.18);
+  padding-top: 1rem;
+}
+
+.ayuno-landing .alert-panel--hero p {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+}
+
+.ayuno-landing .alert-panel__title {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-gold-light) !important;
+  margin: 0 0 0.7rem;
+}
+
+.ayuno-landing .alert-panel--warn {
+  background: transparent;
+  border-top-color: rgba(166, 124, 82, 0.28);
+}
+
+.ayuno-landing .alert-panel--warn p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -456,6 +543,16 @@ html {
 @media (min-width: 560px) {
   .ayuno-landing .registro-form__fields {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .ayuno-landing .registro-form__fields--3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 720px) {
+  .ayuno-landing .registro-form__fields--3 {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 
@@ -526,20 +623,26 @@ html {
    -------------------------------------------------------------------------- */
 .ayuno-landing .section--definition {
   background: var(--color-surface);
-  padding-top: clamp(3rem, 6vw, 5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
 }
 
 .ayuno-landing .split {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 @media (min-width: 860px) {
   .ayuno-landing .split {
-    grid-template-columns: 0.95fr 1.05fr;
-    gap: 3.5rem;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 2.25rem;
+  }
+
+  .ayuno-landing .split__body h2 {
+    text-align: left;
   }
 }
 
@@ -597,7 +700,7 @@ html {
 
 .ayuno-landing .concept-banner {
   position: relative;
-  min-height: clamp(24rem, 85vw, 32rem);
+  min-height: clamp(20rem, 55vw, 28rem);
   overflow: hidden;
   display: flex;
   width: 100%;
@@ -605,8 +708,7 @@ html {
 
 @media (min-width: 640px) {
   .ayuno-landing .section--concept.story-panel .concept-banner {
-    min-height: 100vh;
-    min-height: 100svh;
+    min-height: clamp(22rem, 48vh, 30rem);
     flex: 1;
   }
 }
@@ -645,17 +747,20 @@ html {
    -------------------------------------------------------------------------- */
 .ayuno-landing .section--benefits {
   background: var(--color-bg);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  padding-bottom: clamp(2.25rem, 5vw, 3.5rem);
 }
 
 .ayuno-landing .benefits-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 @media (min-width: 640px) {
   .ayuno-landing .benefits-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.15rem;
   }
 }
 
@@ -680,7 +785,7 @@ html {
   background: var(--color-surface);
   border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: var(--radius-lg);
-  padding: 1.6rem 1.4rem;
+  padding: 1.35rem 1.25rem;
   box-shadow: var(--shadow-soft);
   transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -777,26 +882,7 @@ html {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.ayuno-landing .carousel__btn {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: var(--color-surface);
-  color: var(--color-slate-deep);
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.ayuno-landing .carousel__btn:hover {
-  background: var(--color-slate-deep);
-  color: #fff;
-  border-color: var(--color-slate-deep);
+  margin-top: 1rem;
 }
 
 .ayuno-landing .carousel__dots {
@@ -826,7 +912,7 @@ html {
 }
 
 /* --------------------------------------------------------------------------
-   GUIDE EXPLORER (interactivo)
+   PRACTICE SLIDER (8 prácticas)
    -------------------------------------------------------------------------- */
 .ayuno-landing .section--guide {
   background: var(--color-surface);
@@ -834,257 +920,86 @@ html {
 
 .ayuno-landing .guide-header {
   max-width: 40rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.35rem;
 }
 
-.ayuno-landing .guide-explorer {
-  background: var(--color-bg);
+.ayuno-landing .practice-slider {
+  max-width: 720px;
+  margin: 0 auto 1.35rem;
+}
+
+.ayuno-landing .practice-slider__viewport {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: calc(var(--radius-lg) + 4px);
-  padding: clamp(1.25rem, 3vw, 1.75rem);
-  margin-bottom: 2rem;
+  background: var(--color-bg);
   box-shadow: var(--shadow-soft);
 }
 
-.ayuno-landing .guide-explorer__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+.ayuno-landing .practice-slider__track {
+  position: relative;
+  min-height: 16rem;
 }
 
-@media (min-width: 720px) {
-  .ayuno-landing .guide-explorer__meta {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-}
-
-.ayuno-landing .guide-explorer__hint {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--color-muted);
-  max-width: 28rem;
-}
-
-.ayuno-landing .guide-progress {
-  min-width: 14rem;
-}
-
-.ayuno-landing .guide-progress__label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.88rem;
-  color: var(--color-muted);
-  margin-bottom: 0.4rem;
-}
-
-.ayuno-landing .guide-progress__label strong {
-  color: var(--color-slate-deep);
-}
-
-.ayuno-landing .guide-progress__bar {
-  height: 6px;
-  background: #e2e0d8;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.ayuno-landing .guide-progress__bar span {
-  display: block;
-  height: 100%;
-  width: 12.5%;
-  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-light));
-  border-radius: inherit;
-  transition: width 0.35s ease;
-}
-
-.ayuno-landing .guide-progress__marked {
-  margin-top: 0.45rem;
-  font-size: 0.85rem;
-  color: var(--color-muted);
-}
-
-.ayuno-landing .guide-explorer__layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 900px) {
-  .ayuno-landing .guide-explorer__layout {
-    grid-template-columns: 280px 1fr;
-    gap: 1.75rem;
-    align-items: start;
-  }
-}
-
-.ayuno-landing .guide-nav {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 0.35rem;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  overscroll-behavior-x: contain;
-}
-
-@media (min-width: 900px) {
-  .ayuno-landing .guide-nav {
-    flex-direction: column;
-    overflow: visible;
-    padding-bottom: 0;
-  }
-}
-
-.ayuno-landing .guide-nav__btn {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  text-align: left;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-ink-soft);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  min-width: 11.5rem;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-@media (min-width: 900px) {
-  .ayuno-landing .guide-nav__btn {
-    min-width: 0;
-    width: 100%;
-  }
-}
-
-.ayuno-landing .guide-nav__btn:hover {
-  border-color: var(--color-gold);
-}
-
-.ayuno-landing .guide-nav__btn.is-active {
-  background: var(--color-slate-deep);
-  border-color: var(--color-slate-deep);
-  color: #fff;
-}
-
-.ayuno-landing .guide-nav__btn.is-marked:not(.is-active) {
-  border-color: var(--color-gold);
-  background: var(--color-gold-subtle);
-}
-
-.ayuno-landing .guide-nav__btn.is-marked::after {
-  content: "✓";
-  margin-left: auto;
-  color: var(--color-gold);
-  font-weight: 700;
-}
-
-.ayuno-landing .guide-nav__btn.is-active.is-marked::after {
-  color: var(--color-gold-light);
-}
-
-.ayuno-landing .guide-nav__num {
-  font-family: var(--font-serif);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-gold);
-  flex-shrink: 0;
-}
-
-.ayuno-landing .guide-nav__btn.is-active .guide-nav__num {
-  color: var(--color-gold-light);
-}
-
-.ayuno-landing .guide-nav__title {
-  line-height: 1.3;
-}
-
-.ayuno-landing .guide-stage {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  padding: clamp(1.35rem, 3vw, 2rem);
-  min-height: 22rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.ayuno-landing .guide-stage__visual {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(145deg, #f3ebe0, #e8dcc8);
-  margin-bottom: 1.25rem;
-  transition: transform 0.35s ease;
-}
-
-.ayuno-landing .guide-stage.is-animating .guide-stage__visual {
-  transform: scale(0.9);
-}
-
-.ayuno-landing .guide-stage__visual svg {
-  width: 1.75rem;
-  height: 1.75rem;
-  color: var(--color-gold);
-}
-
-.ayuno-landing .guide-panel {
-  flex: 1;
+.ayuno-landing .practice-slide {
+  display: none;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
   animation: ayuno-fade 0.35s ease;
 }
 
-.ayuno-landing .guide-panel[hidden] {
-  display: none;
+.ayuno-landing .practice-slide.is-active {
+  display: block;
 }
 
-.ayuno-landing .guide-panel__label {
+.ayuno-landing .practice-slide__num {
+  margin: 0 0 0.75rem;
   font-size: 0.8rem;
-  text-transform: uppercase;
+  font-weight: 700;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-gold);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
 }
 
-.ayuno-landing .guide-panel h3 {
+.ayuno-landing .practice-slide h3 {
   font-family: var(--font-serif);
-  font-size: 1.35rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
   margin-bottom: 0.85rem;
 }
 
-.ayuno-landing .guide-panel h3 strong {
-  font-weight: 700;
-}
-
-.ayuno-landing .guide-panel p {
+.ayuno-landing .practice-slide p {
   font-size: 1.05rem;
   line-height: 1.75;
+  margin: 0;
 }
 
-.ayuno-landing .guide-stage__actions {
+.ayuno-landing .practice-slider__controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  justify-content: center;
+  margin-top: 0.9rem;
+}
+
+.ayuno-landing .practice-slider__dots {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ayuno-landing .practice-slider__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.ayuno-landing .practice-slider__dot.is-active {
+  background: var(--color-gold);
+  transform: scale(1.25);
 }
 
 .ayuno-landing .btn-ghost {
@@ -1136,24 +1051,6 @@ html {
   color: #fff;
 }
 
-.ayuno-landing .alert-banner {
-  padding: 1.35rem 1.5rem;
-  background: var(--color-amber-bg);
-  border: 1px solid var(--color-amber-border);
-  border-radius: var(--radius-lg);
-  color: var(--color-amber-text);
-}
-
-.ayuno-landing .alert-banner p {
-  color: var(--color-amber-text);
-  margin: 0;
-  font-size: 0.98rem;
-}
-
-.ayuno-landing .alert-banner strong {
-  color: #5a3f22;
-}
-
 /* --------------------------------------------------------------------------
    JOURNEY / 21 días
    -------------------------------------------------------------------------- */
@@ -1183,6 +1080,7 @@ html {
   flex-direction: column;
   gap: 1rem;
   max-width: 28rem;
+  margin: 0 auto;
 }
 
 .ayuno-landing .journey-form__row {
@@ -1220,6 +1118,13 @@ html {
   background: #fff;
 }
 
+.ayuno-landing .journey-form input.is-invalid,
+.ayuno-landing .registro-form input.is-invalid {
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+  background: #fffafa;
+}
+
 .ayuno-landing .journey-form__note {
   margin: 0;
   font-size: 0.85rem;
@@ -1252,9 +1157,10 @@ html {
 
 .ayuno-landing .journey__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   margin-bottom: 1.75rem;
+  max-width: 28rem;
 }
 
 @media (max-width: 520px) {
@@ -1388,13 +1294,6 @@ html {
   border-color: var(--color-gold);
 }
 
-.ayuno-landing .guide-explorer__hint a {
-  color: var(--color-gold);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 /* --------------------------------------------------------------------------
    FAQ
    -------------------------------------------------------------------------- */
@@ -1491,50 +1390,8 @@ html {
 }
 
 /* --------------------------------------------------------------------------
-   CLOSING
+   FOOTER
    -------------------------------------------------------------------------- */
-.ayuno-landing .section--closing {
-  position: relative;
-  isolation: isolate;
-  text-align: center;
-  padding: clamp(4rem, 8vw, 6rem) 0;
-  overflow: hidden;
-}
-
-.ayuno-landing .closing__media {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-
-.ayuno-landing .closing__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ayuno-landing .closing__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.92));
-}
-
-.ayuno-landing .event-dates {
-  font-family: var(--font-serif);
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
-  font-weight: 700;
-  color: var(--color-gold-light);
-  letter-spacing: 0.02em;
-  margin: 0 0 2rem;
-}
-
-.ayuno-landing .section--closing .cta-block {
-  max-width: 32rem;
-  margin: 0 auto;
-  text-align: left;
-}
-
 .ayuno-landing .site-footer {
   position: relative;
   z-index: 50;

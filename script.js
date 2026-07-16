@@ -1,9 +1,6 @@
 /**
- * Ayuno de Daniel — interacciones + seguimiento persistente
- *
- * Persistencia local (localStorage) por teléfono.
- * Listo para conectar un backend WordPress vía window.AYUNO_API:
- *   { load(phone), save(phone, data) } → Promise
+ * Ayuno de Daniel — interacciones + seguimiento
+ * Persistencia: localStorage + Supabase (leads)
  */
 (function () {
   "use strict";
@@ -12,22 +9,44 @@
   var STORAGE_PREFIX = "ayuno_daniel_progress_v1_";
   var AYUNO_START = new Date(2026, 6, 13); // 13 jul 2026
   var AYUNO_TOTAL_DAYS = 21;
-
-  var GUIDE_ICONS = [
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h7a3 3 0 013 3v11a2.5 2.5 0 00-2.5-2.5H4V5z"/><path d="M20 5h-7a3 3 0 00-3 3v11a2.5 2.5 0 012.5-2.5H20V5z"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21h6M12 3c-2.5 2-4 4.5-4 7a4 4 0 008 0c0-2.5-1.5-5-4-7z"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-3z"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8.5 10.5h.01M15.5 10.5h.01M8.5 15c1.2 1.2 5.8 1.2 7 0"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="8" r="2.5"/><circle cx="16" cy="9" r="2"/><path d="M3.5 18c0-2.8 2.4-4.5 5.5-4.5s5.5 1.7 5.5 4.5"/><path d="M14 18c.2-1.8 1.6-3.2 3.8-3.5 1.7.2 3.2 1.3 3.2 3"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.8 4 6 4 9s-1.5 6.2-4 9c-2.5-2.8-4-6-4-9s1.5-6.2 4-9z"/></svg>',
-  ];
+  var supabaseClient = null;
 
   /* ---------- utilidades ---------- */
 
+  // Nombre: letras (con acentos), espacios, apóstrofe o guion. Ej. "María José", "O'Connor"
+  var NAME_RE = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+  // Teléfono México: exactamente 10 dígitos
+  var PHONE_RE = /^\d{10}$/;
+
   function normalizePhone(raw) {
-    return String(raw || "").replace(/\D/g, "");
+    var digits = String(raw || "").replace(/\D/g, "");
+    // Si viene con código de país 52 + 10 dígitos, nos quedamos con los 10 locales
+    if (digits.length === 12 && digits.indexOf("52") === 0) {
+      digits = digits.slice(2);
+    }
+    return digits;
+  }
+
+  function normalizeName(raw) {
+    return String(raw || "")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function isValidName(raw) {
+    var name = normalizeName(raw);
+    if (name.length < 2 || name.length > 60) return false;
+    return NAME_RE.test(name);
+  }
+
+  function isValidPhone(raw) {
+    return PHONE_RE.test(normalizePhone(raw));
+  }
+
+  function setFieldValidity(input, isValid) {
+    if (!input) return;
+    input.classList.toggle("is-invalid", !isValid);
+    input.setAttribute("aria-invalid", isValid ? "false" : "true");
   }
 
   function formatPhoneDisplay(digits) {
@@ -46,23 +65,56 @@
     var today = startOfDay(now || new Date());
     var start = startOfDay(AYUNO_START);
     var diff = Math.floor((today - start) / 86400000) + 1;
-    if (diff < 1) return 0; // aún no empieza
-    if (diff > AYUNO_TOTAL_DAYS) return AYUNO_TOTAL_DAYS + 1; // ya terminó
+    if (diff < 1) return 0;
+    if (diff > AYUNO_TOTAL_DAYS) return AYUNO_TOTAL_DAYS + 1;
     return diff;
   }
 
   function emptyProgress(extra) {
-    return {
-      phone: "",
-      name: "",
-      practices: { marked: {}, seen: { "0": true } },
-      days: {},
-      updatedAt: new Date().toISOString(),
-      ...(extra || {}),
-    };
+    return Object.assign(
+      {
+        phone: "",
+        name: "",
+        email: "",
+        practices: { marked: {}, seen: { "0": true } },
+        days: {},
+        updatedAt: new Date().toISOString(),
+      },
+      extra || {}
+    );
   }
 
-  /* ---------- storage (local + hook API) ---------- */
+  function isSupabaseConfigured() {
+    var cfg = window.AYUNO_SUPABASE;
+    return !!(
+      cfg &&
+      cfg.url &&
+      cfg.anonKey &&
+      cfg.url.indexOf("TU-PROYECTO") === -1 &&
+      cfg.anonKey.indexOf("TU_ANON") === -1 &&
+      window.supabase
+    );
+  }
+
+  function getSupabase() {
+    if (!isSupabaseConfigured()) return null;
+    if (supabaseClient) return supabaseClient;
+    var cfg = window.AYUNO_SUPABASE;
+    supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+    return supabaseClient;
+  }
+
+  function rowToProgress(row) {
+    return emptyProgress({
+      phone: row.phone || "",
+      name: row.name || "",
+      email: row.email || "",
+      days: row.days || {},
+      updatedAt: row.updated_at || new Date().toISOString(),
+    });
+  }
+
+  /* ---------- storage (local + Supabase) ---------- */
 
   var ProgressStore = {
     getSession: function () {
@@ -108,43 +160,89 @@
       return data;
     },
 
+    loadRemote: function (phone) {
+      var client = getSupabase();
+      if (!client || !phone) return Promise.resolve(null);
+      return client
+        .from("leads")
+        .select("*")
+        .eq("phone", phone)
+        .maybeSingle()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          return res.data ? rowToProgress(res.data) : null;
+        });
+    },
+
+    saveRemote: function (phone, data) {
+      var client = getSupabase();
+      if (!client || !phone) return Promise.resolve(data);
+      var payload = {
+        phone: phone,
+        name: data.name || "Participante",
+        email: data.email || null,
+        days: data.days || {},
+        updated_at: new Date().toISOString(),
+      };
+      return client
+        .from("leads")
+        .upsert(payload, { onConflict: "phone" })
+        .select()
+        .maybeSingle()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          return res.data ? rowToProgress(res.data) : data;
+        });
+    },
+
     load: function (phone) {
+      var self = this;
       var local = this.loadLocal(phone);
-      var api = window.AYUNO_API;
-      if (api && typeof api.load === "function" && phone) {
-        return Promise.resolve(api.load(phone))
-          .then(function (remote) {
-            if (!remote) return local;
-            // Merge: más reciente gana a nivel simple
-            var remoteTime = remote.updatedAt ? Date.parse(remote.updatedAt) : 0;
-            var localTime = local.updatedAt ? Date.parse(local.updatedAt) : 0;
-            return remoteTime >= localTime ? remote : local;
-          })
-          .catch(function () {
-            return local;
-          });
-      }
-      return Promise.resolve(local);
+      return this.loadRemote(phone)
+        .then(function (remote) {
+          if (!remote) return local;
+          var remoteTime = remote.updatedAt ? Date.parse(remote.updatedAt) : 0;
+          var localTime = local.updatedAt ? Date.parse(local.updatedAt) : 0;
+          var chosen = remoteTime >= localTime ? remote : local;
+          self.saveLocal(phone, chosen);
+          return chosen;
+        })
+        .catch(function () {
+          return local;
+        });
     },
 
     save: function (phone, data) {
       this.saveLocal(phone, data);
-      var api = window.AYUNO_API;
-      if (api && typeof api.save === "function" && phone) {
-        return Promise.resolve(api.save(phone, data)).catch(function () {
-          return data;
+      return this.saveRemote(phone, data).catch(function () {
+        return data;
+      });
+    },
+
+    loginOrRegister: function (phone, name, email) {
+      var self = this;
+      var localMerged = this.migrateGuestToPhone(phone, name);
+      if (email) localMerged.email = email;
+
+      return this.loadRemote(phone)
+        .then(function (remote) {
+          var base = remote || localMerged;
+          base.name = name || base.name || "";
+          base.email = email || base.email || "";
+          base.phone = phone;
+          // merge days
+          base.days = Object.assign({}, remote && remote.days, localMerged.days);
+          return self.save(phone, base);
+        })
+        .catch(function () {
+          return self.save(phone, localMerged);
         });
-      }
-      return Promise.resolve(data);
     },
 
     migrateGuestToPhone: function (phone, name) {
       var guest = this.loadLocal("guest");
       var existing = this.loadLocal(phone);
-      var hasExisting =
-        Object.keys(existing.days || {}).length > 0 ||
-        Object.keys(existing.practices.marked || {}).length > 0;
-
+      var hasExisting = Object.keys(existing.days || {}).length > 0;
       var base = hasExisting ? existing : guest;
       base.phone = phone;
       base.name = name || base.name || "";
@@ -169,8 +267,12 @@
     },
     persist: function () {
       var key = this.phone || "guest";
-      ProgressStore.save(key, this.data);
-      this.notify();
+      var self = this;
+      return ProgressStore.save(key, this.data).then(function (data) {
+        self.data = data || self.data;
+        self.notify();
+        return self.data;
+      });
     },
   };
 
@@ -202,19 +304,32 @@
     });
   }
 
-  function initStoryToggle(root) {
-    var toggle = root.querySelector("[data-story-toggle]");
-    var intro = root.querySelector("#hero-intro");
-    var label = root.querySelector("[data-story-label]");
-    if (!toggle || !intro) return;
+  function initAlertToggles(root) {
+    var toggles = root.querySelectorAll("[data-alert-toggle]");
+    if (!toggles.length) return;
 
-    toggle.addEventListener("click", function () {
-      var open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", open ? "false" : "true");
-      intro.hidden = open;
-      if (label) {
-        label.textContent = open ? "Leer la introducción" : "Ocultar introducción";
+    toggles.forEach(function (toggle) {
+      var panelId = toggle.getAttribute("aria-controls");
+      var panel = panelId ? document.getElementById(panelId) : null;
+      var label = toggle.querySelector("[data-alert-label]");
+      var openLabel = label ? label.textContent.trim() : "";
+      var closedLabel = openLabel;
+
+      if (panelId === "hero-intro") {
+        closedLabel = "Leer la introducción";
+        openLabel = "Ocultar introducción";
+      } else if (panelId === "cuidado-panel") {
+        closedLabel = "Cuidado: No reemplaces una distracción por otra";
+        openLabel = "Ocultar alerta de cuidado";
       }
+
+      toggle.addEventListener("click", function () {
+        var open = toggle.getAttribute("aria-expanded") === "true";
+        var nextOpen = !open;
+        toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+        if (panel) panel.hidden = !nextOpen;
+        if (label) label.textContent = nextOpen ? openLabel : closedLabel;
+      });
     });
   }
 
@@ -226,8 +341,6 @@
       carousel.querySelectorAll("[data-carousel-slide]")
     );
     var dotsWrap = carousel.querySelector("[data-carousel-dots]");
-    var prevBtn = carousel.querySelector("[data-carousel-prev]");
-    var nextBtn = carousel.querySelector("[data-carousel-next]");
     var index = 0;
     var timer;
 
@@ -260,177 +373,91 @@
       clearInterval(timer);
       timer = setInterval(function () {
         goTo(index + 1);
-      }, 7000);
+      }, 15000);
     }
 
-    if (prevBtn) {
-      prevBtn.addEventListener("click", function () {
-        goTo(index - 1);
-        restartAutoplay();
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", function () {
-        goTo(index + 1);
-        restartAutoplay();
-      });
-    }
+    carousel.addEventListener("mouseenter", function () {
+      clearInterval(timer);
+    });
+    carousel.addEventListener("mouseleave", restartAutoplay);
 
     restartAutoplay();
   }
 
-  function initGuideExplorer(root) {
-    var explorer = root.querySelector("[data-guide-explorer]");
-    if (!explorer) return;
+  function initPracticeSlider(root) {
+    var slider = root.querySelector("[data-practice-slider]");
+    if (!slider) return;
 
-    var tabs = Array.prototype.slice.call(
-      explorer.querySelectorAll("[data-guide-tab]")
+    var slides = Array.prototype.slice.call(
+      slider.querySelectorAll("[data-practice-slide]")
     );
-    var panels = Array.prototype.slice.call(
-      explorer.querySelectorAll("[data-guide-panel]")
-    );
-    var prevBtn = explorer.querySelector("[data-guide-prev]");
-    var nextBtn = explorer.querySelector("[data-guide-next]");
-    var markBtn = explorer.querySelector("[data-guide-mark]");
-    var markLabel = explorer.querySelector("[data-mark-label]");
-    var seenEl = explorer.querySelector("[data-guide-seen]");
-    var markedEl = explorer.querySelector("[data-guide-marked]");
-    var barEl = explorer.querySelector("[data-guide-bar]");
-    var progressBar = explorer.querySelector(".guide-progress__bar");
-    var visual = explorer.querySelector("[data-guide-visual]");
-    var stage = explorer.querySelector(".guide-stage");
+    var dotsWrap = slider.querySelector("[data-practice-dots]");
+    var index = 0;
+    var timer;
 
-    var current = 0;
+    if (!slides.length) return;
 
-    function getMarked() {
-      return AppState.data.practices.marked || {};
-    }
-
-    function getSeen() {
-      return AppState.data.practices.seen || {};
-    }
-
-    function updateProgress() {
-      var seen = getSeen();
-      var marked = getMarked();
-      var seenCount = Object.keys(seen).filter(function (k) {
-        return seen[k];
-      }).length;
-      var markedCount = Object.keys(marked).filter(function (k) {
-        return marked[k];
-      }).length;
-      if (seenEl) seenEl.textContent = String(seenCount);
-      if (markedEl) markedEl.textContent = String(markedCount);
-      if (barEl) barEl.style.width = (seenCount / tabs.length) * 100 + "%";
-      if (progressBar) progressBar.setAttribute("aria-valuenow", String(seenCount));
-    }
-
-    function updateMarkButton() {
-      var isMarked = !!getMarked()[current];
-      if (markBtn) markBtn.setAttribute("aria-pressed", isMarked ? "true" : "false");
-      if (markLabel) {
-        markLabel.textContent = isMarked
-          ? "Práctica marcada ✓"
-          : "Marcar esta práctica";
-      }
-    }
-
-    function goTo(index) {
-      if (index < 0 || index >= tabs.length) return;
-      current = index;
-      AppState.data.practices.seen[String(current)] = true;
-      AppState.persist();
-
-      var marked = getMarked();
-      var seen = getSeen();
-
-      tabs.forEach(function (tab, i) {
-        var active = i === current;
-        tab.classList.toggle("is-active", active);
-        tab.classList.toggle("is-seen", !!seen[String(i)]);
-        tab.classList.toggle("is-marked", !!marked[String(i)]);
-        tab.setAttribute("aria-selected", active ? "true" : "false");
+    slides.forEach(function (_, i) {
+      var dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "practice-slider__dot" + (i === 0 ? " is-active" : "");
+      dot.setAttribute("aria-label", "Ir a la práctica " + (i + 1));
+      dot.addEventListener("click", function () {
+        goTo(i);
+        restartAutoplay();
       });
-
-      panels.forEach(function (panel, i) {
-        var active = i === current;
-        panel.classList.toggle("is-active", active);
-        panel.hidden = !active;
-      });
-
-      if (visual) visual.innerHTML = GUIDE_ICONS[current] || "";
-
-      if (stage) {
-        stage.classList.add("is-animating");
-        setTimeout(function () {
-          stage.classList.remove("is-animating");
-        }, 200);
-      }
-
-      if (prevBtn) prevBtn.disabled = current === 0;
-      if (nextBtn) nextBtn.disabled = current === tabs.length - 1;
-
-      updateMarkButton();
-      updateProgress();
-
-      if (tabs[current] && tabs[current].scrollIntoView) {
-        tabs[current].scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest",
-        });
-      }
-    }
-
-    function refreshFromState() {
-      var marked = getMarked();
-      tabs.forEach(function (tab, i) {
-        tab.classList.toggle("is-marked", !!marked[String(i)]);
-        tab.classList.toggle("is-seen", !!getSeen()[String(i)]);
-      });
-      updateMarkButton();
-      updateProgress();
-    }
-
-    tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        goTo(parseInt(tab.getAttribute("data-guide-tab"), 10));
-      });
+      if (dotsWrap) dotsWrap.appendChild(dot);
     });
 
-    if (prevBtn) {
-      prevBtn.addEventListener("click", function () {
-        goTo(current - 1);
+    function goTo(next) {
+      index = (next + slides.length) % slides.length;
+      slides.forEach(function (slide, i) {
+        slide.classList.toggle("is-active", i === index);
+      });
+      var dots = dotsWrap ? dotsWrap.querySelectorAll(".practice-slider__dot") : [];
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle("is-active", i === index);
       });
     }
 
-    if (nextBtn) {
-      nextBtn.addEventListener("click", function () {
-        goTo(current + 1);
-      });
+    function restartAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () {
+        goTo(index + 1);
+      }, 15000);
     }
 
-    if (markBtn) {
-      markBtn.addEventListener("click", function () {
-        var key = String(current);
-        if (AppState.data.practices.marked[key]) {
-          delete AppState.data.practices.marked[key];
-        } else {
-          AppState.data.practices.marked[key] = true;
-        }
-        AppState.persist();
-        tabs[current].classList.toggle(
-          "is-marked",
-          !!AppState.data.practices.marked[key]
-        );
-        updateMarkButton();
-        updateProgress();
-      });
+    // Swipe simple en móvil
+    var startX = 0;
+    var viewport = slider.querySelector(".practice-slider__viewport");
+    if (viewport) {
+      viewport.addEventListener(
+        "touchstart",
+        function (e) {
+          startX = e.changedTouches[0].screenX;
+        },
+        { passive: true }
+      );
+      viewport.addEventListener(
+        "touchend",
+        function (e) {
+          var dx = e.changedTouches[0].screenX - startX;
+          if (Math.abs(dx) < 40) return;
+          if (dx < 0) goTo(index + 1);
+          else goTo(index - 1);
+          restartAutoplay();
+        },
+        { passive: true }
+      );
     }
 
-    AppState.onChange(refreshFromState);
+    slider.addEventListener("mouseenter", function () {
+      clearInterval(timer);
+    });
+    slider.addEventListener("mouseleave", restartAutoplay);
+
     goTo(0);
-    refreshFromState();
+    restartAutoplay();
   }
 
   function initJourney(root) {
@@ -445,16 +472,16 @@
     var phoneEl = section.querySelector("[data-journey-phone]");
     var dayEl = section.querySelector("[data-journey-day]");
     var doneEl = section.querySelector("[data-journey-done]");
-    var practicesEl = section.querySelector("[data-journey-practices]");
     var hintEl = section.querySelector("[data-journey-today-hint]");
     var calendarEl = section.querySelector("[data-journey-calendar]");
     var checkinBtn = section.querySelector("[data-journey-checkin]");
+    var statusEl = section.querySelector("[data-journey-status]");
 
-    function countMarkedPractices() {
-      var marked = AppState.data.practices.marked || {};
-      return Object.keys(marked).filter(function (k) {
-        return marked[k];
-      }).length;
+    function setJourneyStatus(message, isError) {
+      if (!statusEl) return;
+      statusEl.hidden = false;
+      statusEl.textContent = message;
+      statusEl.classList.toggle("is-error", !!isError);
     }
 
     function countDoneDays() {
@@ -534,7 +561,6 @@
       if (phoneEl) phoneEl.textContent = formatPhoneDisplay(AppState.phone);
       if (dayEl) dayEl.textContent = displayDay;
       if (doneEl) doneEl.textContent = String(countDoneDays());
-      if (practicesEl) practicesEl.textContent = String(countMarkedPractices());
 
       if (hintEl) {
         if (currentDay < 1) {
@@ -571,21 +597,73 @@
         event.preventDefault();
         var phoneInput = form.querySelector('input[name="phone"]');
         var nameInput = form.querySelector('input[name="name"]');
+        var name = normalizeName(nameInput && nameInput.value);
         var phone = normalizePhone(phoneInput && phoneInput.value);
-        var name = (nameInput && nameInput.value.trim()) || "";
+        var btn = form.querySelector(".btn-cta");
+        var nameOk = isValidName(name);
+        var phoneOk = isValidPhone(phone);
 
-        if (phone.length < 8) {
-          if (phoneInput) phoneInput.focus();
-          alert("Ingresa un número de teléfono válido (mínimo 8 dígitos).");
+        setFieldValidity(nameInput, nameOk);
+        setFieldValidity(phoneInput, phoneOk);
+
+        if (!nameOk) {
+          if (nameInput) nameInput.focus();
+          setJourneyStatus(
+            "Ingresa un nombre válido (solo letras, espacios, apóstrofe o guion).",
+            true
+          );
           return;
         }
 
-        var data = ProgressStore.migrateGuestToPhone(phone, name);
-        AppState.phone = phone;
-        AppState.data = data;
-        ProgressStore.setSession({ phone: phone, name: data.name });
-        AppState.persist();
-        renderDashboard();
+        if (!phoneOk) {
+          if (phoneInput) phoneInput.focus();
+          setJourneyStatus("Ingresa un teléfono de exactamente 10 dígitos.", true);
+          return;
+        }
+
+        if (nameInput) nameInput.value = name;
+        if (phoneInput) phoneInput.value = formatPhoneDisplay(phone);
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Entrando…";
+        }
+
+        ProgressStore.loginOrRegister(phone, name)
+          .then(function (data) {
+            AppState.phone = phone;
+            AppState.data = data;
+            ProgressStore.setSession({ phone: phone, name: data.name });
+            AppState.notify();
+            setJourneyStatus(
+              isSupabaseConfigured()
+                ? "Bienvenido. Tu avance quedó guardado en la nube."
+                : "Sesión iniciada en este dispositivo. Configura Supabase para sincronizar."
+            );
+            renderDashboard();
+          })
+          .catch(function () {
+            setJourneyStatus("No pudimos guardar ahora. Intenta de nuevo.", true);
+          })
+          .finally(function () {
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = "Entrar a mi propósito";
+            }
+          });
+      });
+
+      ["input", "blur"].forEach(function (evt) {
+        form.addEventListener(evt, function (e) {
+          var target = e.target;
+          if (!target || !target.name) return;
+          if (target.name === "name") {
+            setFieldValidity(target, !target.value || isValidName(target.value));
+          }
+          if (target.name === "phone") {
+            setFieldValidity(target, !target.value || isValidPhone(target.value));
+          }
+        });
       });
     }
 
@@ -657,70 +735,47 @@
       status.classList.toggle("is-error", !!isError);
     }
 
-    function encodeForm(form) {
-      var data = new FormData(form);
-      // Netlify requiere form-name en el body
-      if (!data.get("form-name")) {
-        data.set("form-name", form.getAttribute("name") || "registro-ayuno");
-      }
-      var params = new URLSearchParams();
-      data.forEach(function (value, key) {
-        params.append(key, value);
-      });
-      return params.toString();
-    }
-
     forms.forEach(function (form) {
       form.addEventListener("submit", function (event) {
+        event.preventDefault();
         var nameInput = form.querySelector('input[name="nombre"]');
+        var phoneInput = form.querySelector('input[name="telefono"]');
         var emailInput = form.querySelector('input[name="email"]');
         var btn = form.querySelector(".btn-cta");
-        var usesNetlify = form.hasAttribute("data-netlify") || form.hasAttribute("netlify");
 
-        if (!nameInput.value.trim() || !emailInput.value.trim()) {
-          event.preventDefault();
-          setStatus(form, "Completa tu nombre y email.", true);
+        var name = normalizeName(nameInput && nameInput.value);
+        var phone = normalizePhone(phoneInput && phoneInput.value);
+        var email = emailInput ? emailInput.value.trim() : "";
+        var nameOk = isValidName(name);
+        var phoneOk = isValidPhone(phone);
+
+        setFieldValidity(nameInput, nameOk);
+        setFieldValidity(phoneInput, phoneOk);
+
+        if (!nameOk) {
+          setStatus(
+            form,
+            "Ingresa un nombre válido (solo letras, espacios, apóstrofe o guion).",
+            true
+          );
           return;
         }
-
-        // Si hay endpoint propio (WP / CRM), deja el submit nativo
-        var action = form.getAttribute("action") || "";
-        var hasCustomEndpoint =
-          action &&
-          action !== "#" &&
-          action.indexOf("/#") !== 0 &&
-          !usesNetlify;
-
-        if (hasCustomEndpoint) {
+        if (!phoneOk) {
+          setStatus(form, "Ingresa un teléfono de exactamente 10 dígitos.", true);
           return;
         }
-
-        event.preventDefault();
 
         if (btn) {
           btn.disabled = true;
           btn.textContent = "Enviando…";
         }
 
-        // Netlify Forms en producción; en local solo respaldo
-        var onNetlify =
-          /netlify\.app$/i.test(window.location.hostname) ||
-          /netlify\.com$/i.test(window.location.hostname);
-
-        var submitPromise =
-          usesNetlify && onNetlify
-            ? fetch("/", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: encodeForm(form),
-              }).then(function (res) {
-                if (!res.ok) throw new Error("No se pudo enviar el registro");
-                return res;
-              })
-            : Promise.resolve({ local: true });
-
-        submitPromise
-          .then(function (result) {
+        ProgressStore.loginOrRegister(phone, name, email)
+          .then(function (data) {
+            AppState.phone = phone;
+            AppState.data = data;
+            ProgressStore.setSession({ phone: phone, name: data.name });
+            AppState.notify();
             form.classList.add("is-submitted");
             if (btn) {
               btn.textContent = "Registro recibido";
@@ -728,37 +783,17 @@
             }
             setStatus(
               form,
-              result && result.local
-                ? "¡Listo! Registro guardado. En Netlify también llegará a Forms."
-                : "¡Gracias! Te registramos para el desafío de 21 días."
+              isSupabaseConfigured()
+                ? "¡Gracias! Ya estás registrado. Continúa en Tu camino de 21 días."
+                : "Registro guardado en este dispositivo. Configura Supabase para sincronizar leads."
             );
-
-            var journeyName = document.getElementById("journey-name");
-            if (journeyName && !journeyName.value) {
-              journeyName.value = nameInput.value.trim();
-            }
-
-            // Guarda lead local como respaldo
-            try {
-              var leads = JSON.parse(localStorage.getItem("ayuno_leads_v1") || "[]");
-              leads.push({
-                nombre: nameInput.value.trim(),
-                email: emailInput.value.trim(),
-                at: new Date().toISOString(),
-              });
-              localStorage.setItem("ayuno_leads_v1", JSON.stringify(leads));
-            } catch (e) {}
           })
           .catch(function () {
             if (btn) {
               btn.disabled = false;
               btn.textContent = "Aceptar el desafío de 21 días";
             }
-            setStatus(
-              form,
-              "No pudimos enviar ahora. Intenta de nuevo en unos minutos.",
-              true
-            );
+            setStatus(form, "No pudimos registrar ahora. Intenta de nuevo.", true);
           });
       });
     });
@@ -877,19 +912,36 @@
     update();
   }
 
+  function resetScrollOnLoad() {
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    if (!window.location.hash || window.location.hash === "#registro") {
+      window.scrollTo(0, 0);
+    }
+    requestAnimationFrame(function () {
+      document.documentElement.classList.add("is-smooth-scroll");
+    });
+  }
+
   function boot() {
     var root = document.querySelector(".ayuno-landing");
     if (!root) return;
 
+    resetScrollOnLoad();
+
     bootState().then(function () {
       initAccordion(root);
-      initStoryToggle(root);
+      initAlertToggles(root);
       initCarousel(root);
-      initGuideExplorer(root);
+      initPracticeSlider(root);
       initJourney(root);
       initReveal(root);
       initForms(root);
       initStoryScroll(root);
+      if (!window.location.hash || window.location.hash === "#registro") {
+        window.scrollTo(0, 0);
+      }
     });
   }
 
