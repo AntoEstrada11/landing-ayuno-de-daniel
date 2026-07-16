@@ -1,0 +1,15 @@
+# Landing estática — Netlify
+# Producción: main
+# Branch deploy: dev (activar "Branch deploys" en el panel de Netlify)
+# Deploy Preview: cada Pull Request
+
+[build]
+  publish = "."
+  command = "exit 0"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Formularios Netlify Forms (registro)
+[build.processing]
+  skip_processing = false

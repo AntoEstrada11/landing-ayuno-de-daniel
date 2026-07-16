@@ -506,6 +506,21 @@ html {
   transform: none;
 }
 
+.ayuno-landing .form-status {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: #166534;
+  text-align: center;
+}
+
+.ayuno-landing .form-status.is-error {
+  color: #b91c1c;
+}
+
+.ayuno-landing .form-status[hidden] {
+  display: none;
+}
+
 /* --------------------------------------------------------------------------
    SPLIT (definición con imagen)
    -------------------------------------------------------------------------- */

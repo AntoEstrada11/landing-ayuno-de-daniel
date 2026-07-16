@@ -649,30 +649,117 @@
   function initForms(root) {
     var forms = root.querySelectorAll(".registro-form");
 
+    function setStatus(form, message, isError) {
+      var status = form.querySelector("[data-form-status]");
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = message;
+      status.classList.toggle("is-error", !!isError);
+    }
+
+    function encodeForm(form) {
+      var data = new FormData(form);
+      // Netlify requiere form-name en el body
+      if (!data.get("form-name")) {
+        data.set("form-name", form.getAttribute("name") || "registro-ayuno");
+      }
+      var params = new URLSearchParams();
+      data.forEach(function (value, key) {
+        params.append(key, value);
+      });
+      return params.toString();
+    }
+
     forms.forEach(function (form) {
       form.addEventListener("submit", function (event) {
         var nameInput = form.querySelector('input[name="nombre"]');
         var emailInput = form.querySelector('input[name="email"]');
+        var btn = form.querySelector(".btn-cta");
+        var usesNetlify = form.hasAttribute("data-netlify") || form.hasAttribute("netlify");
 
         if (!nameInput.value.trim() || !emailInput.value.trim()) {
           event.preventDefault();
+          setStatus(form, "Completa tu nombre y email.", true);
           return;
         }
 
-        if (!form.getAttribute("action") || form.getAttribute("action") === "#") {
-          event.preventDefault();
-          form.classList.add("is-submitted");
-          var btn = form.querySelector(".btn-cta");
-          if (btn) {
-            btn.textContent = "Registro recibido";
-            btn.disabled = true;
-          }
-          // Si ya tiene nombre en el journey form vacío, sugerimos el nombre
-          var journeyName = document.getElementById("journey-name");
-          if (journeyName && !journeyName.value) {
-            journeyName.value = nameInput.value.trim();
-          }
+        // Si hay endpoint propio (WP / CRM), deja el submit nativo
+        var action = form.getAttribute("action") || "";
+        var hasCustomEndpoint =
+          action &&
+          action !== "#" &&
+          action.indexOf("/#") !== 0 &&
+          !usesNetlify;
+
+        if (hasCustomEndpoint) {
+          return;
         }
+
+        event.preventDefault();
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Enviando…";
+        }
+
+        // Netlify Forms en producción; en local solo respaldo
+        var onNetlify =
+          /netlify\.app$/i.test(window.location.hostname) ||
+          /netlify\.com$/i.test(window.location.hostname);
+
+        var submitPromise =
+          usesNetlify && onNetlify
+            ? fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: encodeForm(form),
+              }).then(function (res) {
+                if (!res.ok) throw new Error("No se pudo enviar el registro");
+                return res;
+              })
+            : Promise.resolve({ local: true });
+
+        submitPromise
+          .then(function (result) {
+            form.classList.add("is-submitted");
+            if (btn) {
+              btn.textContent = "Registro recibido";
+              btn.disabled = true;
+            }
+            setStatus(
+              form,
+              result && result.local
+                ? "¡Listo! Registro guardado. En Netlify también llegará a Forms."
+                : "¡Gracias! Te registramos para el desafío de 21 días."
+            );
+
+            var journeyName = document.getElementById("journey-name");
+            if (journeyName && !journeyName.value) {
+              journeyName.value = nameInput.value.trim();
+            }
+
+            // Guarda lead local como respaldo
+            try {
+              var leads = JSON.parse(localStorage.getItem("ayuno_leads_v1") || "[]");
+              leads.push({
+                nombre: nameInput.value.trim(),
+                email: emailInput.value.trim(),
+                at: new Date().toISOString(),
+              });
+              localStorage.setItem("ayuno_leads_v1", JSON.stringify(leads));
+            } catch (e) {}
+          })
+          .catch(function () {
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = "Aceptar el desafío de 21 días";
+            }
+            setStatus(
+              form,
+              "No pudimos enviar ahora. Intenta de nuevo en unos minutos.",
+              true
+            );
+          });
       });
     });
   }

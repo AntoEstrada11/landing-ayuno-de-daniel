@@ -32,7 +32,20 @@
         <p class="hero__lead reveal">¿Sientes que estás viviendo en piloto automático?</p>
 
         <div class="cta-block hero__cta reveal">
-          <form class="registro-form" action="#" method="post" novalidate>
+          <form
+            class="registro-form"
+            name="registro-ayuno"
+            method="POST"
+            action="/#registro"
+            data-netlify="true"
+            data-netlify-honeypot="bot-field"
+            netlify
+            novalidate
+          >
+            <input type="hidden" name="form-name" value="registro-ayuno" />
+            <p class="sr-only" aria-hidden="true">
+              <label>No llenar: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+            </p>
             <div class="registro-form__fields">
               <label class="sr-only" for="hero-nombre">Nombre</label>
               <input id="hero-nombre" name="nombre" type="text" placeholder="Nombre" required autocomplete="name" />
@@ -40,6 +53,7 @@
               <input id="hero-email" name="email" type="email" placeholder="Email" required autocomplete="email" />
             </div>
             <button type="submit" class="btn-cta">Aceptar el desafío de 21 días</button>
+            <p class="form-status" data-form-status hidden></p>
           </form>
         </div>
       </div>
@@ -462,7 +476,20 @@
           <p class="event-dates">Del 13 de Julio al 2 de Agosto</p>
 
           <div class="cta-block">
-            <form class="registro-form" action="#" method="post" novalidate>
+            <form
+              class="registro-form"
+              name="registro-ayuno"
+              method="POST"
+              action="/#cierre"
+              data-netlify="true"
+              data-netlify-honeypot="bot-field"
+              netlify
+              novalidate
+            >
+              <input type="hidden" name="form-name" value="registro-ayuno" />
+              <p class="sr-only" aria-hidden="true">
+                <label>No llenar: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+              </p>
               <div class="registro-form__fields">
                 <label class="sr-only" for="footer-nombre">Nombre</label>
                 <input id="footer-nombre" name="nombre" type="text" placeholder="Nombre" required autocomplete="name" />
@@ -470,6 +497,7 @@
                 <input id="footer-email" name="email" type="email" placeholder="Email" required autocomplete="email" />
               </div>
               <button type="submit" class="btn-cta">Aceptar el desafío de 21 días</button>
+              <p class="form-status" data-form-status hidden></p>
             </form>
           </div>
         </div>
