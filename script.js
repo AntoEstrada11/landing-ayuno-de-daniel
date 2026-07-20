@@ -84,6 +84,43 @@
     );
   }
 
+  var DAILY_TASK_COUNT = 4;
+
+  function isDayDone(entry) {
+    if (entry === true) return true;
+    if (entry && typeof entry === "object") return !!entry.done;
+    return false;
+  }
+
+  function getDayTasks(entry) {
+    if (entry && typeof entry === "object" && entry.tasks) return entry.tasks;
+    return {};
+  }
+
+  function ensureDayEntry(days, key) {
+    var cur = days[key];
+    if (cur === true) {
+      days[key] = {
+        done: true,
+        tasks: { "0": true, "1": true, "2": true, "3": true },
+      };
+    } else if (!cur || typeof cur !== "object") {
+      days[key] = { done: false, tasks: {} };
+    } else {
+      cur.tasks = cur.tasks || {};
+      if (typeof cur.done !== "boolean") cur.done = false;
+      days[key] = cur;
+    }
+    return days[key];
+  }
+
+  function allTasksComplete(tasks) {
+    for (var i = 0; i < DAILY_TASK_COUNT; i++) {
+      if (!tasks[String(i)]) return false;
+    }
+    return true;
+  }
+
   function isSupabaseConfigured() {
     var cfg = window.AYUNO_SUPABASE;
     return !!(
@@ -316,10 +353,10 @@
       var closedLabel = openLabel;
 
       if (panelId === "hero-intro") {
-        closedLabel = "Leer la introducción";
+        closedLabel = "Lee la introducción";
         openLabel = "Ocultar introducción";
       } else if (panelId === "cuidado-panel") {
-        closedLabel = "Cuidado: No reemplaces una distracción por otra";
+        closedLabel = "⚠️ Cuidado: No reemplaces una distracción por otra";
         openLabel = "Ocultar alerta de cuidado";
       }
 
@@ -328,7 +365,14 @@
         var nextOpen = !open;
         toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
         if (panel) panel.hidden = !nextOpen;
-        if (label) label.textContent = nextOpen ? openLabel : closedLabel;
+        if (label) {
+          if (panelId === "cuidado-panel" && !nextOpen) {
+            label.innerHTML =
+              "⚠️ <strong>Cuidado: No reemplaces una distracción por otra</strong>";
+          } else {
+            label.textContent = nextOpen ? openLabel : closedLabel;
+          }
+        }
       });
     });
   }
@@ -382,6 +426,22 @@
     carousel.addEventListener("mouseleave", restartAutoplay);
 
     restartAutoplay();
+  }
+
+  function initTestimonialPhotos(root) {
+    var imgs = root.querySelectorAll("[data-avatar-fallback]");
+    imgs.forEach(function (img) {
+      img.addEventListener("error", function () {
+        var initials = img.getAttribute("data-avatar-fallback") || "";
+        var wrap = img.parentElement;
+        if (!wrap) return;
+        var fallback = document.createElement("div");
+        fallback.className = "testimonial-card__avatar";
+        fallback.setAttribute("aria-hidden", "true");
+        fallback.textContent = initials;
+        wrap.replaceChild(fallback, img);
+      });
+    });
   }
 
   function initPracticeSlider(root) {
@@ -476,6 +536,9 @@
     var calendarEl = section.querySelector("[data-journey-calendar]");
     var checkinBtn = section.querySelector("[data-journey-checkin]");
     var statusEl = section.querySelector("[data-journey-status]");
+    var checklistEl = section.querySelector("[data-daily-checklist]");
+    var dailyStatusEl = section.querySelector("[data-daily-status]");
+    var dailyWrap = section.querySelector("[data-journey-daily]");
 
     function setJourneyStatus(message, isError) {
       if (!statusEl) return;
@@ -484,11 +547,50 @@
       statusEl.classList.toggle("is-error", !!isError);
     }
 
+    function setDailyStatus(message, isError) {
+      if (!dailyStatusEl) return;
+      dailyStatusEl.hidden = !message;
+      dailyStatusEl.textContent = message || "";
+      dailyStatusEl.classList.toggle("is-error", !!isError);
+    }
+
     function countDoneDays() {
       var days = AppState.data.days || {};
       return Object.keys(days).filter(function (k) {
-        return days[k];
+        return isDayDone(days[k]);
       }).length;
+    }
+
+    function renderChecklist() {
+      if (!checklistEl) return;
+      var currentDay = getCurrentDayNumber(new Date());
+      var inputs = checklistEl.querySelectorAll("[data-daily-task]");
+      var canEdit =
+        currentDay >= 1 && currentDay <= AYUNO_TOTAL_DAYS;
+
+      if (dailyWrap) {
+        dailyWrap.hidden = !canEdit;
+      }
+
+      if (!canEdit) {
+        setDailyStatus("");
+        return;
+      }
+
+      var entry = ensureDayEntry(AppState.data.days, String(currentDay));
+      inputs.forEach(function (input) {
+        var key = input.getAttribute("data-daily-task");
+        input.checked = !!entry.tasks[key];
+        input.disabled = !!entry.done;
+      });
+
+      if (entry.done) {
+        setDailyStatus("Día marcado. Las tareas de hoy ya quedaron registradas.");
+      } else if (allTasksComplete(entry.tasks)) {
+        setDailyStatus("Listo: ya puedes marcar el día de hoy como cumplido.");
+      } else {
+        setDailyStatus("Completa las 4 tareas para habilitar el botón del día.", true);
+      }
     }
 
     function renderCalendar() {
@@ -503,7 +605,8 @@
         btn.setAttribute("role", "listitem");
         btn.setAttribute("data-day", String(d));
 
-        var isDone = !!AppState.data.days[String(d)];
+        var entry = AppState.data.days[String(d)];
+        var isDone = isDayDone(entry);
         var isToday = d === currentDay;
         var isFuture = currentDay > 0 && d > currentDay;
         var notStarted = currentDay === 0;
@@ -529,11 +632,24 @@
           btn.addEventListener("click", function () {
             if (btn.disabled) return;
             var key = String(dayNum);
-            if (AppState.data.days[key]) {
-              delete AppState.data.days[key];
-            } else {
-              AppState.data.days[key] = true;
+            var dayEntry = ensureDayEntry(AppState.data.days, key);
+
+            if (dayEntry.done) {
+              dayEntry.done = false;
+              AppState.persist();
+              renderDashboard();
+              return;
             }
+
+            if (!allTasksComplete(dayEntry.tasks)) {
+              setDailyStatus(
+                "Primero marca las 4 tareas del día para poder registrarlo.",
+                true
+              );
+              return;
+            }
+
+            dayEntry.done = true;
             AppState.persist();
             renderDashboard();
           });
@@ -573,23 +689,56 @@
         }
       }
 
+      renderChecklist();
       renderCalendar();
 
       if (checkinBtn) {
         var todayKey = String(currentDay);
-        var canCheck =
+        var canPeriod =
           currentDay >= 1 && currentDay <= AYUNO_TOTAL_DAYS;
-        var isChecked = canCheck && !!AppState.data.days[todayKey];
-        checkinBtn.disabled = !canCheck;
+        var entry = canPeriod
+          ? ensureDayEntry(AppState.data.days, todayKey)
+          : null;
+        var isChecked = !!(entry && entry.done);
+        var tasksReady = !!(entry && allTasksComplete(entry.tasks));
+        var canMark = canPeriod && tasksReady;
+
+        checkinBtn.disabled = !canMark && !isChecked;
+        if (canPeriod && !tasksReady && !isChecked) {
+          checkinBtn.disabled = true;
+        }
         checkinBtn.setAttribute("aria-pressed", isChecked ? "true" : "false");
-        checkinBtn.textContent = !canCheck
+        checkinBtn.textContent = !canPeriod
           ? currentDay < 1
             ? "Aún no comienza el Ayuno"
             : "Propósito finalizado"
           : isChecked
             ? "Día de hoy marcado ✓"
-            : "Marcar el día de hoy como cumplido";
+            : tasksReady
+              ? "Marcar el día de hoy como cumplido"
+              : "Completa las 4 tareas para marcar el día";
       }
+    }
+
+    if (checklistEl) {
+      checklistEl.addEventListener("change", function (event) {
+        var input = event.target;
+        if (!input || !input.getAttribute("data-daily-task")) return;
+        var currentDay = getCurrentDayNumber(new Date());
+        if (currentDay < 1 || currentDay > AYUNO_TOTAL_DAYS) return;
+
+        var entry = ensureDayEntry(AppState.data.days, String(currentDay));
+        if (entry.done) {
+          input.checked = !!entry.tasks[input.getAttribute("data-daily-task")];
+          return;
+        }
+
+        var key = input.getAttribute("data-daily-task");
+        if (input.checked) entry.tasks[key] = true;
+        else delete entry.tasks[key];
+        AppState.persist();
+        renderDashboard();
+      });
     }
 
     if (form) {
@@ -635,11 +784,10 @@
             AppState.data = data;
             ProgressStore.setSession({ phone: phone, name: data.name });
             AppState.notify();
-            setJourneyStatus(
-              isSupabaseConfigured()
-                ? "Bienvenido. Tu avance quedó guardado en la nube."
-                : "Sesión iniciada en este dispositivo. Configura Supabase para sincronizar."
-            );
+            if (statusEl) {
+              statusEl.hidden = true;
+              statusEl.textContent = "";
+            }
             renderDashboard();
           })
           .catch(function () {
@@ -682,11 +830,24 @@
         var currentDay = getCurrentDayNumber(new Date());
         if (currentDay < 1 || currentDay > AYUNO_TOTAL_DAYS) return;
         var key = String(currentDay);
-        if (AppState.data.days[key]) {
-          delete AppState.data.days[key];
-        } else {
-          AppState.data.days[key] = true;
+        var entry = ensureDayEntry(AppState.data.days, key);
+
+        if (entry.done) {
+          entry.done = false;
+          AppState.persist();
+          renderDashboard();
+          return;
         }
+
+        if (!allTasksComplete(entry.tasks)) {
+          setDailyStatus(
+            "Primero marca las 4 tareas del día para poder registrarlo.",
+            true
+          );
+          return;
+        }
+
+        entry.done = true;
         AppState.persist();
         renderDashboard();
       });
@@ -934,6 +1095,7 @@
       initAccordion(root);
       initAlertToggles(root);
       initCarousel(root);
+      initTestimonialPhotos(root);
       initPracticeSlider(root);
       initJourney(root);
       initReveal(root);
