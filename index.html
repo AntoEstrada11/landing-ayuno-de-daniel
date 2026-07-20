@@ -6,30 +6,17 @@
   <title>Ayuno de Daniel: Rumbo al Monte Sión</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="ayuno-landing ayuno-landing--story">
 
-    <!-- Indicador de progreso (scrollytelling) -->
-    <nav class="story-progress" data-story-progress aria-label="Progreso de la página">
-      <button type="button" class="story-progress__dot is-active" data-story-target="registro" aria-label="Inicio"></button>
-      <button type="button" class="story-progress__dot" data-story-target="que-es" aria-label="Qué es el Ayuno"></button>
-      <button type="button" class="story-progress__dot" data-story-target="monte-sion" aria-label="Monte Sión"></button>
-      <button type="button" class="story-progress__dot" data-story-target="beneficios" aria-label="Beneficios"></button>
-      <button type="button" class="story-progress__dot" data-story-target="testimonios" aria-label="Testimonios"></button>
-      <button type="button" class="story-progress__dot" data-story-target="guia" aria-label="Guía práctica"></button>
-      <button type="button" class="story-progress__dot" data-story-target="mi-camino" aria-label="Tu camino"></button>
-      <button type="button" class="story-progress__dot" data-story-target="faq" aria-label="Preguntas"></button>
-      <button type="button" class="story-progress__dot" data-story-target="cierre" aria-label="Registro"></button>
-    </nav>
-
     <!-- SECCIÓN 1: HERO -->
     <header class="hero story-panel" id="registro" data-story-panel data-story-section>
       <div class="hero__media" aria-hidden="true">
         <img
-          src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80"
+          src="assets/monte-sion-hero.png"
           alt=""
           width="1920"
           height="1280"
@@ -38,33 +25,31 @@
       </div>
 
       <div class="container hero__content">
-        <p class="hero__brand reveal">Ayuno de Daniel</p>
-        <h1 class="hero__title reveal">Ayuno de Daniel: Rumbo al Monte Sión</h1>
-        <p class="hero__lead reveal">¿Sientes que estás viviendo en piloto automático?</p>
+        <div class="hero__copy">
+          <p class="hero__brand reveal">
+            <span class="hero__brand-mark">Ayuno de Daniel</span>
+          </p>
+          <h1 class="hero__title reveal">Rumbo al Monte Sión</h1>
+          <p class="hero__lead reveal">¿Sientes que estás viviendo en piloto automático?</p>
 
-        <div class="cta-block hero__cta reveal">
-          <form class="registro-form" action="#" method="post" novalidate>
-            <div class="registro-form__fields">
-              <label class="sr-only" for="hero-nombre">Nombre</label>
-              <input id="hero-nombre" name="nombre" type="text" placeholder="Nombre" required autocomplete="name" />
-              <label class="sr-only" for="hero-email">Email</label>
-              <input id="hero-email" name="email" type="email" placeholder="Email" required autocomplete="email" />
+          <div class="hero__actions reveal">
+            <a class="btn-cta btn-cta--link" href="#mi-camino">Únete al desafío de 21 Días</a>
+          </div>
+
+          <div class="alert-disclosure alert-disclosure--hero reveal">
+            <button
+              type="button"
+              class="alert-trigger alert-trigger--intro"
+              data-alert-toggle
+              aria-expanded="false"
+              aria-controls="hero-intro"
+            >
+              <span data-alert-label>Lee la introducción</span>
+              <span class="alert-trigger__chevron" aria-hidden="true"></span>
+            </button>
+            <div class="alert-panel alert-panel--hero" id="hero-intro" role="region" aria-labelledby="hero-intro-title" hidden>
+              <p class="hero__emphasis">Este propósito de 21 días es una oportunidad para fortalecer tu relación con Dios, recibir el Espíritu Santo y transformar tu vida.</p>
             </div>
-            <button type="submit" class="btn-cta">Aceptar el desafío de 21 días</button>
-          </form>
-        </div>
-      </div>
-
-      <div class="hero__story">
-        <div class="container container--narrow">
-          <button type="button" class="hero__toggle" data-story-toggle aria-expanded="false" aria-controls="hero-intro">
-            <span data-story-label>Leer la introducción</span>
-            <span class="hero__toggle-icon" aria-hidden="true"></span>
-          </button>
-          <div class="hero__intro" id="hero-intro" hidden>
-            <p>Desde que te levantas hasta que anochece, pasas el día consumiendo una cantidad interminable de noticias, publicaciones y videos. Al final del día, el cansancio no es solo físico; sientes una profunda saturación mental. Tu mente ya no tiene espacio para procesar más información. Necesitas urgentemente una desintoxicación.</p>
-            <p>Pero sabemos que no se trata solo de fatiga. A solas, cuando el ruido digital se apaga, te das cuenta de que hay un vacío interno. Las distracciones no pueden llenarlo.</p>
-            <p class="hero__emphasis">Ese espacio no necesita más entretenimiento; necesita al Espíritu Santo.</p>
           </div>
         </div>
       </div>
@@ -77,7 +62,7 @@
           <div class="split reveal">
             <figure class="split__media">
               <img
-                src="https://images.unsplash.com/photo-1504052434569-70ad7836fea3?auto=format&fit=crop&w=1000&q=80"
+                src="https://universal.org.mx/wp-content/uploads/2026/06/web-sitio-12.jpg"
                 alt="Biblia abierta con luz suave"
                 width="1000"
                 height="750"
@@ -88,11 +73,11 @@
               <h2 id="titulo-definicion">¿Qué es el Ayuno de Daniel?</h2>
               <p>No se trata de dejar de comer, sino de cuidar lo que alimenta tu mente. Inspirado en la decisión del profeta Daniel en Babilonia, es un periodo de 21 días (del 13 de julio al 2 de agosto) donde evitamos todo contenido secular, redes sociales y entretenimiento.</p>
 
-              <blockquote class="verse">
-                <p>“Se propuso Daniel en su corazón no contaminarse con los manjares del rey ni con el vino que él bebía…” (Daniel 1:8).</p>
+              <blockquote class="verse verse--compact">
+                <p>“Se propuso Daniel en su corazón no contaminarse con los manjares del rey ni con el vino que él bebía…” (Daniel 1:8)</p>
               </blockquote>
 
-              <p class="section__closing">El objetivo es reducir las distracciones para encontrar claridad, fortalecer tu espíritu y recibir lo más valioso: el Espíritu Santo.</p>
+              <p class="section__closing">El objetivo es reducir las distracciones para encontrar claridad, fortalecer tu espíritu y recibir lo más valioso: <strong>el Espíritu Santo</strong></p>
             </div>
           </div>
         </div>
@@ -102,8 +87,8 @@
       <section class="section section--concept story-panel" id="monte-sion" aria-labelledby="titulo-concepto" data-story-panel data-story-section>
         <div class="concept-banner reveal">
           <img
-            src="https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=1600&q=80"
-            alt="Montañas al amanecer"
+            src="assets/camino-monte-sion.png"
+            alt="Camino hacia el Monte Sión"
             width="1600"
             height="900"
             loading="lazy"
@@ -111,18 +96,18 @@
           <div class="concept-banner__overlay">
             <div class="container container--narrow">
               <h2 id="titulo-concepto">¿Por qué rumbo al Monte Sión?</h2>
-              <p>El libro de Joel relata el duro momento de miseria y derrota que vivió el pueblo de Dios. Pero el profeta a los instó a volver a Dios, el único que podía transformar su situación, sin importar qué tan complicadas fueran las circunstancias. Asimismo, les enseñó que podían recibir el Espíritu de Dios, quien cambiaría por completo sus vidas y les daría visión y dirección para continuar y vencer.</p>
+              <p>El libro de Joel relata el duro momento de miseria y derrota que vivió el pueblo de Dios. Pero el profeta los instó a volver a Dios, el único que podía transformar su situación, sin importar qué tan complicadas fueran las circunstancias. Asimismo, les enseñó que podían recibir el Espíritu de Dios, quien cambiaría por completo sus vidas y les daría visión y dirección para continuar y vencer.</p>
 
-              <blockquote class="verse verse--on-dark">
-                <p>“Y sucederá que después de esto, derramaré Mi Espíritu sobre toda carne... vuestros jóvenes verán visiones” (Joel 2:28).</p>
+              <blockquote class="verse verse--on-dark verse--compact">
+                <p>“Y sucederá que después de esto, derramaré Mi Espíritu sobre toda carne... vuestros jóvenes verán visiones” (Joel 2:28)</p>
               </blockquote>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 4: BENEFICIOS -->
-      <section class="section section--benefits story-panel" id="beneficios" aria-labelledby="titulo-beneficios" data-story-panel data-story-section>
+      <!-- SECCIÓN 4: BENEFICIOS (scroll libre para ver las 5 cards) -->
+      <section class="section section--benefits story-layer" id="beneficios" aria-labelledby="titulo-beneficios" data-story-section data-story-layer>
         <div class="container">
           <h2 id="titulo-beneficios" class="section__title-center reveal">5 beneficios de vivir este propósito</h2>
 
@@ -175,15 +160,24 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 5: TESTIMONIOS (carrusel) -->
-      <section class="section section--testimonials story-panel" id="testimonios" aria-labelledby="titulo-testimonios" data-story-panel data-story-section>
+      <!-- SECCIÓN 5: TESTIMONIOS (carrusel, scroll libre para poder interactuar) -->
+      <section class="section section--testimonials story-layer" id="testimonios" aria-labelledby="titulo-testimonios" data-story-section data-story-layer>
         <div class="container">
           <h2 id="titulo-testimonios" class="section__title-center reveal">Ellos participaron en el Ayuno de Daniel</h2>
 
           <div class="carousel reveal" data-carousel>
             <div class="carousel__track" data-carousel-track>
               <figure class="testimonial-card is-active" data-carousel-slide>
-                <div class="testimonial-card__avatar" aria-hidden="true">AG</div>
+                <div class="testimonial-card__photo testimonial-card__photo--alexandra">
+                  <img
+                    src="assets/testimonials/alexandra-godinez.png"
+                    alt="Alexandra Godínez"
+                    width="240"
+                    height="240"
+                    loading="lazy"
+                    data-avatar-fallback="AG"
+                  />
+                </div>
                 <blockquote>
                   <p>“El Ayuno de Daniel fue mi oportunidad para buscar a Dios de corazón. El día que tuve mi encuentro con Él fue el más feliz de mi vida; me mostró mi verdadero valor y sanó mi vacío interno. Hoy tengo paz, confianza y una alegría real.”</p>
                 </blockquote>
@@ -191,7 +185,16 @@
               </figure>
 
               <figure class="testimonial-card" data-carousel-slide>
-                <div class="testimonial-card__avatar" aria-hidden="true">AM</div>
+                <div class="testimonial-card__photo testimonial-card__photo--alejandra">
+                  <img
+                    src="assets/testimonials/alejandra-morales.png"
+                    alt="Alejandra Morales"
+                    width="240"
+                    height="240"
+                    loading="lazy"
+                    data-avatar-fallback="AM"
+                  />
+                </div>
                 <blockquote>
                   <p>“Durante el propósito me dediqué a orar y a meditar en la Biblia. Tras aprender a perdonar y obedecer a Dios, recibí el Espíritu Santo. Dejé de ser una persona irritable y fui completamente libre de los tormentos espirituales, como ver espíritus, que antes me perturbaban.”</p>
                 </blockquote>
@@ -199,24 +202,31 @@
               </figure>
 
               <figure class="testimonial-card" data-carousel-slide>
-                <div class="testimonial-card__avatar" aria-hidden="true">BG</div>
+                <div class="testimonial-card__photo testimonial-card__photo--beatriz">
+                  <img
+                    src="assets/testimonials/beatriz-gonzalez.png"
+                    alt="Beatriz González"
+                    width="240"
+                    height="240"
+                    loading="lazy"
+                    data-avatar-fallback="BG"
+                  />
+                </div>
                 <blockquote>
                   <p>“Fue el momento perfecto para acercarme a Dios a través de la oración. Al recibir Su Espíritu, dejé de ser una persona impulsiva y acelerada. Él quitó la depresión de mi vida y la llenó de una profunda tranquilidad y fe. Con Él lo tengo todo.”</p>
                 </blockquote>
-                <figcaption>— Beatriz González</figcaption>
+                <figcaption>—Beatriz González</figcaption>
               </figure>
             </div>
 
             <div class="carousel__controls">
-              <button type="button" class="carousel__btn" data-carousel-prev aria-label="Testimonio anterior">‹</button>
               <div class="carousel__dots" data-carousel-dots></div>
-              <button type="button" class="carousel__btn" data-carousel-next aria-label="Siguiente testimonio">›</button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 6: GUÍA PRÁCTICA (explorador interactivo) -->
+      <!-- SECCIÓN 6: GUÍA PRÁCTICA (slider de 8 prácticas) -->
       <section class="section section--guide story-layer" id="guia" aria-labelledby="titulo-guia" data-story-section data-story-layer>
         <div class="container">
           <div class="guide-header reveal">
@@ -224,126 +234,72 @@
             <p class="section__subtitle">Este propósito es una oportunidad para accionar tu fe con cambios prácticos. Aquí tienes los ejemplos de lo que puedes hacer y consumir durante estos 21 días para alimentar tu interior:</p>
           </div>
 
-          <div class="guide-explorer reveal" data-guide-explorer>
-            <div class="guide-explorer__meta">
-              <p class="guide-explorer__hint">Selecciona cada práctica para explorarla. Márcalas cuando quieras aplicarlas — tu avance se guarda automáticamente. Usa <a href="#mi-camino">Tu camino de 21 días</a> para vincularlo a tu teléfono.</p>
-              <div class="guide-progress" aria-live="polite">
-                <div class="guide-progress__label">
-                  <span>Exploradas</span>
-                  <strong><span data-guide-seen>1</span> / 8</strong>
-                </div>
-                <div class="guide-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="8" aria-valuenow="1">
-                  <span data-guide-bar></span>
-                </div>
-                <div class="guide-progress__marked">
-                  Marcadas: <strong><span data-guide-marked>0</span></strong>
-                </div>
+          <div class="practice-slider reveal" data-practice-slider>
+            <div class="practice-slider__viewport">
+              <div class="practice-slider__track" data-practice-track>
+                <article class="practice-slide is-active" data-practice-slide>
+                  <p class="practice-slide__num">01 / 08</p>
+                  <h3><strong>Empieza el día con Dios:</strong></h3>
+                  <p>Prioriza orar al despertarte, aunque sea por unos minutos. Esto definirá el ritmo de tu jornada (Lucas 18:1).</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">02 / 08</p>
+                  <h3><strong>Sustituye, no solo elimines:</strong></h3>
+                  <p>No basta con dejar de ver o escuchar algo; es necesario reemplazarlo por la lectura de la Biblia y libros espirituales que edifiquen tu fe.</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">03 / 08</p>
+                  <h3><strong>Aprovecha los pequeños intervalos:</strong></h3>
+                  <p>Usa el tiempo de traslado, las pausas en el trabajo o entre estudios para escuchar contenidos edificantes.</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">04 / 08</p>
+                  <h3><strong>Establece horarios espirituales:</strong></h3>
+                  <p>Separa momentos fijos en tu día, por más breves que sean, para conectarte con Dios en privado.</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">05 / 08</p>
+                  <h3><strong>Protege tu mente:</strong></h3>
+                  <p>Evita conversaciones, ambientes, murmuraciones, quejas o culpar a otros; aléjate de todo lo que te desvíe de tu propósito (Filipenses 2:14-15).</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">06 / 08</p>
+                  <h3><strong>Reflexiona y sana:</strong></h3>
+                  <p>Evalúa tu vida, reconoce con sinceridad lo que necesitas cambiar, aprende a perdonar y a perdonarte (2 Pedro 3:9; Lucas 6:37).</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">07 / 08</p>
+                  <h3><strong>Fortalece tu fe en comunidad:</strong></h3>
+                  <p>Asiste con mayor frecuencia a las reuniones en la Iglesia, involúcrate en alguno de los grupos de la Universal e invita a otros a unirse contigo a este propósito (Hebreos 10:24-25; Mateo 20:28; 1 Tesalonicenses 5:11).</p>
+                </article>
+                <article class="practice-slide" data-practice-slide>
+                  <p class="practice-slide__num">08 / 08</p>
+                  <h3><strong>Transforma tu entorno:</strong></h3>
+                  <p>Renuncia a todo lo que te perjudique física o espiritualmente, y evangeliza a los demás a través de tu propio testimonio (Romanos 12:1; Hechos 13:47).</p>
+                </article>
               </div>
             </div>
 
-            <div class="guide-explorer__layout">
-              <nav class="guide-nav" role="tablist" aria-label="Prácticas del Ayuno">
-                <button type="button" class="guide-nav__btn is-active is-seen" role="tab" aria-selected="true" aria-controls="guide-panel-0" id="guide-tab-0" data-guide-tab="0">
-                  <span class="guide-nav__num">01</span>
-                  <span class="guide-nav__title">Empieza el día con Dios</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-1" id="guide-tab-1" data-guide-tab="1">
-                  <span class="guide-nav__num">02</span>
-                  <span class="guide-nav__title">Sustituye, no solo elimines</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-2" id="guide-tab-2" data-guide-tab="2">
-                  <span class="guide-nav__num">03</span>
-                  <span class="guide-nav__title">Aprovecha los pequeños intervalos</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-3" id="guide-tab-3" data-guide-tab="3">
-                  <span class="guide-nav__num">04</span>
-                  <span class="guide-nav__title">Establece horarios espirituales</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-4" id="guide-tab-4" data-guide-tab="4">
-                  <span class="guide-nav__num">05</span>
-                  <span class="guide-nav__title">Protege tu mente</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-5" id="guide-tab-5" data-guide-tab="5">
-                  <span class="guide-nav__num">06</span>
-                  <span class="guide-nav__title">Reflexiona y sana</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-6" id="guide-tab-6" data-guide-tab="6">
-                  <span class="guide-nav__num">07</span>
-                  <span class="guide-nav__title">Fortalece tu fe en comunidad</span>
-                </button>
-                <button type="button" class="guide-nav__btn" role="tab" aria-selected="false" aria-controls="guide-panel-7" id="guide-tab-7" data-guide-tab="7">
-                  <span class="guide-nav__num">08</span>
-                  <span class="guide-nav__title">Transforma tu entorno</span>
-                </button>
-              </nav>
-
-              <div class="guide-stage">
-                <div class="guide-stage__visual" aria-hidden="true" data-guide-visual></div>
-
-                <div class="guide-panels">
-                  <div class="guide-panel is-active" role="tabpanel" id="guide-panel-0" aria-labelledby="guide-tab-0" data-guide-panel="0">
-                    <p class="guide-panel__label">Práctica 1 de 8</p>
-                    <h3><strong>Empieza el día con Dios:</strong></h3>
-                    <p>Prioriza orar al despertarte, aunque sea por unos minutos. Esto definirá el ritmo de tu jornada (Lucas 18:1).</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-1" aria-labelledby="guide-tab-1" data-guide-panel="1" hidden>
-                    <p class="guide-panel__label">Práctica 2 de 8</p>
-                    <h3><strong>Sustituye, no solo elimines:</strong></h3>
-                    <p>No basta con dejar de ver o escuchar algo; es necesario reemplazarlo por la lectura de la Biblia y libros espirituales que edifiquen tu fe.</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-2" aria-labelledby="guide-tab-2" data-guide-panel="2" hidden>
-                    <p class="guide-panel__label">Práctica 3 de 8</p>
-                    <h3><strong>Aprovecha los pequeños intervalos:</strong></h3>
-                    <p>Usa el tiempo de traslado, las pausas en el trabajo o entre estudios para escuchar contenidos edificantes.</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-3" aria-labelledby="guide-tab-3" data-guide-panel="3" hidden>
-                    <p class="guide-panel__label">Práctica 4 de 8</p>
-                    <h3><strong>Establece horarios espirituales:</strong></h3>
-                    <p>Separa momentos fijos en tu día, por más breves que sean, para conectarte con Dios en privado.</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-4" aria-labelledby="guide-tab-4" data-guide-panel="4" hidden>
-                    <p class="guide-panel__label">Práctica 5 de 8</p>
-                    <h3><strong>Protege tu mente:</strong></h3>
-                    <p>Evita conversaciones, ambientes, murmuraciones, quejas o culpar a otros; aléjate de todo lo que te desvíe de tu propósito (Filipenses 2:14-15).</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-5" aria-labelledby="guide-tab-5" data-guide-panel="5" hidden>
-                    <p class="guide-panel__label">Práctica 6 de 8</p>
-                    <h3><strong>Reflexiona y sana:</strong></h3>
-                    <p>Evalúa tu vida, reconoce con sinceridad lo que necesitas cambiar, aprende a perdonar y a perdonarte (2 Pedro 3:9; Lucas 6:37).</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-6" aria-labelledby="guide-tab-6" data-guide-panel="6" hidden>
-                    <p class="guide-panel__label">Práctica 7 de 8</p>
-                    <h3><strong>Fortalece tu fe en comunidad:</strong></h3>
-                    <p>Asiste con mayor frecuencia a las reuniones en la Iglesia, involúcrate en alguno de los grupos de la Universal e invita a otros a unirse contigo a este propósito (Hebreos 10:24-25; Mateo 20:28; 1 Tesalonicenses 5:11).</p>
-                  </div>
-
-                  <div class="guide-panel" role="tabpanel" id="guide-panel-7" aria-labelledby="guide-tab-7" data-guide-panel="7" hidden>
-                    <p class="guide-panel__label">Práctica 8 de 8</p>
-                    <h3><strong>Transforma tu entorno:</strong></h3>
-                    <p>Renuncia a todo lo que te perjudique física o espiritualmente, y evangeliza a los demás a través de tu propio testimonio (Romanos 12:1; Hechos 13:47).</p>
-                  </div>
-                </div>
-
-                <div class="guide-stage__actions">
-                  <button type="button" class="btn-ghost" data-guide-prev>← Anterior</button>
-                  <button type="button" class="btn-mark" data-guide-mark aria-pressed="false">
-                    <span data-mark-label>Marcar esta práctica</span>
-                  </button>
-                  <button type="button" class="btn-ghost" data-guide-next>Siguiente →</button>
-                </div>
-              </div>
+            <div class="practice-slider__controls">
+              <div class="practice-slider__dots" data-practice-dots></div>
             </div>
           </div>
 
-          <aside class="alert-banner reveal" role="note">
-            <p><strong>⚠️ Cuidado: No reemplaces una distracción por otra</strong> El objetivo es desarrollar una relación personal y sincera con Dios. Evita usar tu tiempo libre solo para hacer un maratón de películas o series cristianas. Evalúa si realmente edifican tu fe o si solo estás sustituyendo un entretenimiento secular por uno cristiano.</p>
-          </aside>
+          <div class="alert-disclosure alert-disclosure--warn reveal">
+            <button
+              type="button"
+              class="alert-trigger alert-trigger--warn"
+              data-alert-toggle
+              aria-expanded="false"
+              aria-controls="cuidado-panel"
+            >
+              <span data-alert-label>⚠️ <strong>Cuidado: No reemplaces una distracción por otra</strong></span>
+              <span class="alert-trigger__chevron" aria-hidden="true"></span>
+            </button>
+            <aside class="alert-panel alert-panel--warn" id="cuidado-panel" role="note" hidden>
+              <p>El objetivo es desarrollar una relación personal y sincera con Dios. Evita usar tu tiempo libre solo para hacer un maratón de películas o series cristianas. Evalúa si realmente edifican tu fe o si solo estás sustituyendo un entretenimiento secular por uno cristiano.</p>
+            </aside>
+          </div>
         </div>
       </section>
 
@@ -353,22 +309,45 @@
           <div class="journey reveal" data-journey>
             <div class="journey__header">
               <h2 id="titulo-camino">Tu camino de 21 días</h2>
-              <p>Guarda tu avance con tu número de teléfono. Así, cada vez que entres a esta página en este dispositivo, verás en qué día vas y qué prácticas ya marcaste.</p>
+              <p>Ingresa con tu nombre y teléfono para guardar tu avance y no perderlo al cambiar de dispositivo.</p>
             </div>
 
             <!-- Estado: sin sesión -->
             <div class="journey__auth" data-journey-auth>
               <form class="journey-form" data-journey-login novalidate>
                 <div class="journey-form__row">
-                  <label for="journey-phone">Número de teléfono</label>
-                  <input id="journey-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej. 55 1234 5678" required />
+                  <label for="journey-name">Tu nombre</label>
+                  <input
+                    id="journey-name"
+                    name="name"
+                    type="text"
+                    autocomplete="name"
+                    placeholder="Ej. María López"
+                    required
+                    minlength="2"
+                    maxlength="60"
+                    pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*"
+                    title="Solo letras, espacios, apóstrofe o guion"
+                  />
                 </div>
                 <div class="journey-form__row">
-                  <label for="journey-name">Tu nombre <span class="journey-optional">(opcional)</span></label>
-                  <input id="journey-name" name="name" type="text" autocomplete="name" placeholder="Cómo te llamas" />
+                  <label for="journey-phone">Número de teléfono</label>
+                  <input
+                    id="journey-phone"
+                    name="phone"
+                    type="tel"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    placeholder="Ej. 5512345678"
+                    required
+                    maxlength="14"
+                    pattern="(?:\D*\d){10}\D*"
+                    title="Debe tener exactamente 10 dígitos"
+                  />
                 </div>
-                <button type="submit" class="btn-cta">Guardar y continuar mi propósito</button>
-                <p class="journey-form__note">Tu progreso se guarda en este dispositivo. Para sincronizarlo en el celular y la computadora haría falta un servidor (WordPress); la estructura ya está lista para eso.</p>
+                <button type="submit" class="btn-cta">Entrar a mi propósito</button>
+                <p class="form-status" data-journey-status hidden></p>
+                <p class="journey-form__note">Protegemos tus datos. Solo utilizaremos tu nombre y número de teléfono para guardar tu progreso en el Ayuno de Daniel.</p>
               </form>
             </div>
 
@@ -391,10 +370,38 @@
                   <span class="journey-stat__value"><span data-journey-done>0</span>/21</span>
                   <span class="journey-stat__label">Días cumplidos</span>
                 </div>
-                <div class="journey-stat">
-                  <span class="journey-stat__value"><span data-journey-practices>0</span>/8</span>
-                  <span class="journey-stat__label">Prácticas marcadas</span>
-                </div>
+              </div>
+
+              <div class="journey__daily" data-journey-daily>
+                <h3>Tareas de hoy</h3>
+                <p class="journey__daily-hint">Marca las 4 tareas para poder registrar el día como cumplido.</p>
+                <ul class="daily-checklist" data-daily-checklist>
+                  <li>
+                    <label class="daily-check">
+                      <input type="checkbox" data-daily-task="0" />
+                      <span>Lee la Palabra de Dios durante al menos 15 minutos. Antes de comenzar, haz una oración y pídele a Dios que abra tu entendimiento para meditar en ella.</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="daily-check">
+                      <input type="checkbox" data-daily-task="1" />
+                      <span>Ora con base en lo que leíste y busca al Espíritu Santo. Dedica el tiempo que sea necesario.</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="daily-check">
+                      <input type="checkbox" data-daily-task="2" />
+                      <span>Fortalece tu fe. Mira un contenido edificante (serie, película o mensaje), lee un libro de fe o comparte tu fe dando tu testimonio, regalando un libro o enviando un mensaje de esperanza.</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="daily-check">
+                      <input type="checkbox" data-daily-task="3" />
+                      <span>Reflexiona sobre tu día. Pregúntate: «¿Qué haría Jesús?», y piensa cómo puedes ponerlo en práctica mañana.</span>
+                    </label>
+                  </li>
+                </ul>
+                <p class="form-status" data-daily-status hidden></p>
               </div>
 
               <div class="journey__calendar-wrap">
@@ -403,8 +410,8 @@
                   <p data-journey-today-hint>Del 13 de julio al 2 de agosto</p>
                 </div>
                 <div class="journey-calendar" data-journey-calendar role="list" aria-label="Días del Ayuno de Daniel"></div>
-                <button type="button" class="btn-mark journey__checkin" data-journey-checkin>
-                  Marcar el día de hoy como cumplido
+                <button type="button" class="btn-mark journey__checkin" data-journey-checkin disabled>
+                  Completa las 4 tareas para marcar el día
                 </button>
               </div>
             </div>
@@ -456,35 +463,6 @@
           </div>
         </div>
       </section>
-
-      <!-- SECCIÓN 8: FOOTER / CIERRE -->
-      <section class="section section--closing story-layer" id="cierre" aria-labelledby="titulo-cierre" data-story-section data-story-layer>
-        <div class="closing__media" aria-hidden="true">
-          <img
-            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80"
-            alt=""
-            width="1600"
-            height="900"
-            loading="lazy"
-          />
-        </div>
-        <div class="container container--narrow">
-          <h2 id="titulo-cierre" class="sr-only">Únete al Ayuno de Daniel</h2>
-          <p class="event-dates">Del 13 de Julio al 2 de Agosto</p>
-
-          <div class="cta-block">
-            <form class="registro-form" action="#" method="post" novalidate>
-              <div class="registro-form__fields">
-                <label class="sr-only" for="footer-nombre">Nombre</label>
-                <input id="footer-nombre" name="nombre" type="text" placeholder="Nombre" required autocomplete="name" />
-                <label class="sr-only" for="footer-email">Email</label>
-                <input id="footer-email" name="email" type="email" placeholder="Email" required autocomplete="email" />
-              </div>
-              <button type="submit" class="btn-cta">Aceptar el desafío de 21 días</button>
-            </form>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer">
@@ -494,6 +472,8 @@
     </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
