@@ -1,11 +1,21 @@
 # Landing estática — Netlify
-# Producción: main
-# Branch deploy: dev (activar "Branch deploys" en el panel de Netlify)
-# Deploy Preview: cada Pull Request
 #
-# Variables de entorno requeridas para Supabase:
+# ========== CÓMO CONECTAR GITHUB (una sola vez en el panel) ==========
+# 1) Abre: https://app.netlify.com/projects/ayuno-de-daniel/configuration/deploys
+# 2) Continuous deployment → "Link repository" / "Connect to Git provider"
+# 3) Elige GitHub → AntoEstrada11/landing-ayuno-de-daniel
+# 4) Production branch: main
+# 5) Build command:  node scripts/write-config.js
+# 6) Publish directory:  .   (punto = raíz del repo)
+# 7) Guarda. Desde entonces cada push/merge a main publica solo.
+#
+# Branch deploys (opcional): Site configuration → Build & deploy →
+#   Branches → Branch deploys → All  (o solo "dev")
+#
+# Variables de entorno (Site configuration → Environment variables):
 #   SUPABASE_URL
 #   SUPABASE_ANON_KEY
+# ====================================================================
 
 [build]
   publish = "."
@@ -16,3 +26,13 @@
 
 [build.processing]
   skip_processing = false
+
+# Contextos (cuando el repo ya esté linkeado)
+[context.production]
+  command = "node scripts/write-config.js"
+
+[context.deploy-preview]
+  command = "node scripts/write-config.js"
+
+[context.branch-deploy]
+  command = "node scripts/write-config.js"
